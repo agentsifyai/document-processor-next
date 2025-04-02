@@ -168,15 +168,8 @@ export default function FileAnalyzer({ files }: FileAnalyzerProps) {
   const analyzeFiles = async (filesToAnalyze: File[]) => {
     setAnalyzing(true);
 
-    // Create a map to track extensions
     const extensionMap = new Map<string, FileExtensionSummary>();
     let totalAnalyzedFiles = 0;
-    // Variable to track individual file completion (not used in UI but helps with debugging)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let completedAnalyses = 0;
-
-    // Process files
-    const totalFiles = filesToAnalyze.length;
 
     try {
       // Analyze each file
@@ -436,7 +429,7 @@ export default function FileAnalyzer({ files }: FileAnalyzerProps) {
         }
 
         // Update progress
-        completedAnalyses++;
+        // completedAnalyses++;
         totalAnalyzedFiles++;
       }
     } catch (error) {
