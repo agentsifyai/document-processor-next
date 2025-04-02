@@ -11,6 +11,7 @@ interface TempFileData {
   url: string;
   isExtracted?: boolean;
   parent?: string; // To track nested files
+  fullPath?: string; // Store the full file path
 }
 
 // Type for tracking zip extraction progress
@@ -39,13 +40,17 @@ function FileTreeItem({
 }: FileTreeItemProps) {
   const [expanded, setExpanded] = useState(true);
   const isZip = fileData.file.name.toLowerCase().endsWith(".zip");
-  const isFolder = fileData.file.type === 'folder' || fileData.file.name.endsWith('/');
-  
+  const isFolder =
+    fileData.file.type === "folder" || fileData.file.name.endsWith("/");
+
   // Get immediate children - files that have this item as their direct parent
-  const childFiles = allFiles.filter((f) => f.parent === fileData.file.name || 
-    // Also include files where this folder is their direct parent (with full path)
-    (f.parent && f.parent === `${fileData.parent}/${fileData.file.name}`));
-  
+  const childFiles = allFiles.filter(
+    (f) =>
+      f.parent === fileData.file.name ||
+      // Also include files where this folder is their direct parent (with full path)
+      (f.parent && f.parent === `${fileData.parent}/${fileData.file.name}`)
+  );
+
   // Check if we have children
   const hasChildren = childFiles.length > 0;
 
@@ -56,10 +61,7 @@ function FileTreeItem({
         {level > 0 && (
           <div className="flex-shrink-0 flex">
             {Array.from({ length: level }).map((_, i) => (
-              <div 
-                key={i} 
-                className="w-4 flex justify-center relative"
-              >
+              <div key={i} className="w-4 flex justify-center relative">
                 <div className="border-l border-gray-300 h-full absolute top-0 bottom-0"></div>
               </div>
             ))}
@@ -88,7 +90,7 @@ function FileTreeItem({
 
         {/* File icon - different for folders and zips */}
         <Image
-          src={isFolder ? "/file.svg" : isZip ? "/file.svg" : "/file.svg"} 
+          src={isFolder ? "/file.svg" : isZip ? "/file.svg" : "/file.svg"}
           alt={isFolder ? "Folder" : isZip ? "Zip Archive" : "Document"}
           width={isFolder || isZip ? 18 : 16}
           height={isFolder || isZip ? 18 : 16}
@@ -96,8 +98,13 @@ function FileTreeItem({
         />
 
         {/* File name */}
-        <span className={`text-sm ${isZip || isFolder ? "font-medium" : ""} ${isFolder ? "text-blue-700" : ""}`}>
-          {fileData.file.name}{isFolder && !fileData.file.name.endsWith('/') ? '/' : ''}
+        <span
+          className={`text-sm ${isZip || isFolder ? "font-medium" : ""} ${
+            isFolder ? "text-blue-700" : ""
+          }`}
+        >
+          {fileData.file.name}
+          {isFolder && !fileData.file.name.endsWith("/") ? "/" : ""}
         </span>
 
         {/* File size - only for real files */}
@@ -106,11 +113,14 @@ function FileTreeItem({
             {(fileData.file.size / 1024).toFixed(0)} KB
           </span>
         )}
-        
+
         {/* Show indicator for folders */}
-        {isFolder && (
-          <span className="text-xs text-gray-500 ml-2">
-            Folder
+        {isFolder && <span className="text-xs text-gray-500 ml-2">Folder</span>}
+
+        {/* Display full file path on hover */}
+        {fileData.fullPath && (
+          <span className="text-xs text-gray-500 ml-2 hidden group-hover:block">
+            {fileData.fullPath}
           </span>
         )}
 
@@ -130,12 +140,13 @@ function FileTreeItem({
         <div className="border-t border-gray-100">
           {/* Render all child items recursively */}
           {childFiles.map((childFile, childIndex) => {
-            const index = allFiles.findIndex(
-              (f) => f.id === childFile.id
-            );
-            
+            const index = allFiles.findIndex((f) => f.id === childFile.id);
+
             // For folders and nested elements, render recursively
-            if (childFile.file.type === 'folder' || childFile.file.name.endsWith('/')) {
+            if (
+              childFile.file.type === "folder" ||
+              childFile.file.name.endsWith("/")
+            ) {
               return (
                 <FileTreeItem
                   key={`child-folder-${childIndex}`}
@@ -148,7 +159,7 @@ function FileTreeItem({
                 />
               );
             }
-            
+
             // For regular files
             return (
               <div
@@ -158,10 +169,7 @@ function FileTreeItem({
                 {/* Indentation with vertical lines */}
                 <div className="flex-shrink-0 flex">
                   {Array.from({ length: level + 1 }).map((_, i) => (
-                    <div 
-                      key={i} 
-                      className="w-4 flex justify-center relative"
-                    >
+                    <div key={i} className="w-4 flex justify-center relative">
                       <div className="border-l border-gray-300 h-full absolute top-0 bottom-0"></div>
                     </div>
                   ))}
@@ -218,6 +226,57 @@ export default function UploadFile() {
     };
   }, [uploadedFiles]);
 
+  // Log all file paths whenever uploadedFiles changes
+  useEffect(() => {
+    if (uploadedFiles.length > 0) {
+      logAllFilePaths();
+    }
+  }, [uploadedFiles]);
+
+  // Function to log all file paths to console
+  const logAllFilePaths = () => {
+    console.log("=== ALL AVAILABLE FILES AND PATHS ===");
+
+    // Create an array to store file paths with their details
+    const filePaths = uploadedFiles.map((file) => {
+      const path = getFullFilePath(file);
+      return {
+        name: file.file.name,
+        path: path,
+        size:
+          file.file.size > 0
+            ? `${(file.file.size / 1024).toFixed(0)} KB`
+            : "N/A",
+        type:
+          file.file.type ||
+          (file.file.name.endsWith("/") || file.file.type === "folder"
+            ? "folder"
+            : "unknown"),
+      };
+    });
+
+    // Log the complete file listing
+    console.table(filePaths);
+
+    // Also create a simple path-only listing
+    const simplePaths = filePaths.map((f) => f.path);
+    console.log("All file paths (simplified):", simplePaths);
+
+    return filePaths;
+  };
+
+  // Helper function to get the full path for a file
+  const getFullFilePath = (fileData: TempFileData): string => {
+    // If we've already calculated the full path, return it
+    if (fileData.fullPath) return fileData.fullPath;
+
+    // If no parent, this is a root file
+    if (!fileData.parent) return fileData.file.name;
+
+    // Otherwise, build the path from parent and filename
+    return `${fileData.parent}/${fileData.file.name}`;
+  };
+
   // Removes a single file
   const removeFile = (index: number) => {
     setUploadedFiles((prev) => {
@@ -260,6 +319,7 @@ export default function UploadFile() {
           id: generateFileId(file),
           file,
           url: URL.createObjectURL(file),
+          fullPath: file.name,
         });
       }
     }
@@ -302,6 +362,11 @@ export default function UploadFile() {
         }
       });
 
+      // Calculate the full path for the zip file
+      const zipFullPath = parentName
+        ? `${parentName}/${zipFile.name}`
+        : zipFile.name;
+
       // Add the zip file itself so we can display it as the root
       tempFiles.push({
         id: generateFileId(zipFile, parentName),
@@ -309,29 +374,35 @@ export default function UploadFile() {
         url: URL.createObjectURL(zipFile),
         isExtracted: false,
         parent: parentName,
+        fullPath: zipFullPath,
       });
-      
+
       // Create folder entries for all directories
       for (const folderPath of Object.keys(folders)) {
         // Get the name of this folder (last part of the path)
-        const pathParts = folderPath.split('/');
+        const pathParts = folderPath.split("/");
         const folderName = pathParts[pathParts.length - 1];
-        
+
         // Determine the parent path
-        const parentPath = pathParts.length > 1 
-          ? `${zipFile.name}/${pathParts.slice(0, -1).join('/')}` 
-          : zipFile.name;
-        
+        const parentPath =
+          pathParts.length > 1
+            ? `${zipFile.name}/${pathParts.slice(0, -1).join("/")}`
+            : zipFile.name;
+
         // Create a File object for this folder
-        const folderFile = new File([], folderName, { type: 'folder' });
-        
+        const folderFile = new File([], folderName, { type: "folder" });
+
+        // Calculate full path for the folder
+        const folderFullPath = `${zipFullPath}/${folderPath}`;
+
         // Add the folder to tempFiles
         tempFiles.push({
           id: generateFileId(folderFile, `${parentPath}/${folderName}`),
           file: folderFile,
-          url: '',
+          url: "",
           isExtracted: true,
           parent: parentPath,
+          fullPath: folderFullPath,
         });
       }
 
@@ -357,6 +428,9 @@ export default function UploadFile() {
           ? `${zipFile.name}/${folderPath}`
           : zipFile.name;
 
+        // Full file path including all parent zips
+        const fullFilePath = `${zipFullPath}/${filename}`;
+
         // Check if this is a nested zip file
         if (actualFileName.toLowerCase().endsWith(".zip")) {
           // Process nested zip file
@@ -369,6 +443,7 @@ export default function UploadFile() {
             url: URL.createObjectURL(extractedFile),
             isExtracted: true,
             parent: displayPath,
+            fullPath: fullFilePath,
           });
         }
       }
@@ -386,6 +461,7 @@ export default function UploadFile() {
         id: generateFileId(zipFile),
         file: zipFile,
         url: URL.createObjectURL(zipFile),
+        fullPath: parentName ? `${parentName}/${zipFile.name}` : zipFile.name,
       });
     }
   };
@@ -413,6 +489,14 @@ export default function UploadFile() {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
+  };
+
+  // Add a function to manually log all files to console
+  const logFileStructure = () => {
+    const fileStructure = logAllFilePaths();
+    alert(
+      `Logged ${fileStructure.length} files to console. Press F12 to view details.`
+    );
   };
 
   return (
@@ -483,13 +567,22 @@ export default function UploadFile() {
             <h4 className="text-md font-medium text-gray-700">
               Uploaded Documents ({uploadedFiles.length})
             </h4>
-            <button
-              onClick={clearAllFiles}
-              className="text-sm text-red-600 hover:text-red-800"
-              disabled={extractionProgress.processing}
-            >
-              Clear All
-            </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={logFileStructure}
+                className="text-sm text-blue-600 hover:text-blue-800 px-3 py-1 border border-blue-600 rounded"
+                disabled={extractionProgress.processing}
+              >
+                Log Files to Console
+              </button>
+              <button
+                onClick={clearAllFiles}
+                className="text-sm text-red-600 hover:text-red-800"
+                disabled={extractionProgress.processing}
+              >
+                Clear All
+              </button>
+            </div>
           </div>
 
           {/* Display files in a hierarchical structure */}
