@@ -44,3 +44,4 @@ export { ImageAgent } from "./image-agent";
 export { ExcelAgent } from "./excel-agent";
 export { WordAgent } from "./word-agent";
 export { EmailAgent } from "./email-agent";
+export type { AnalysisResult } from "./base-agent";

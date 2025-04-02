@@ -1,7 +1,4 @@
-"use client";
-
 import { useState } from "react";
-
 import { analyzeFile, AnalysisResult } from "../lib/agents";
 
 interface FileExtensionSummary {
@@ -57,6 +54,7 @@ export default function ScanFile({ files }: ScanFileProps) {
         }
 
         // Update progress
+
         totalScannedFiles++;
       }
     } catch (error) {

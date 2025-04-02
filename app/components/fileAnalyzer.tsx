@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { analyzeFile, AnalysisResult } from "../lib/agents";
 
