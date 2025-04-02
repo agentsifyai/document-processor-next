@@ -204,6 +204,14 @@ export default function FileAnalyzer({ files }: FileAnalyzerProps) {
               if (meta.estimatedReadingMinutes) {
                 summaryText += ` | ~${meta.estimatedReadingMinutes} min read`;
               }
+              // For PDF files specifically, add topics if available
+              if (extension === 'pdf' && meta.topics && meta.topics.trim().length > 0) {
+                summaryText += ` | Topics: ${meta.topics}`;
+              }
+              // Indicate if content was analyzed by AI
+              if (extension === 'pdf' && meta.contentAnalyzed) {
+                summaryText += ` | AI Analyzed`;
+              }
             } 
             // Handle spreadsheet files
             else if (['xlsx', 'xls', 'xlsm', 'xlsb', 'csv'].includes(extension)) {
@@ -279,6 +287,14 @@ export default function FileAnalyzer({ files }: FileAnalyzerProps) {
               }
               if (meta.estimatedReadingMinutes) {
                 summaryText += ` | ~${meta.estimatedReadingMinutes} min read`;
+              }
+              // For PDF files specifically, add topics if available
+              if (extension === 'pdf' && meta.topics && meta.topics.trim().length > 0) {
+                summaryText += ` | Topics: ${meta.topics}`;
+              }
+              // Indicate if content was analyzed by AI
+              if (extension === 'pdf' && meta.contentAnalyzed) {
+                summaryText += ` | AI Analyzed`;
               }
             } 
             // Handle spreadsheet files
@@ -377,6 +393,8 @@ export default function FileAnalyzer({ files }: FileAnalyzerProps) {
       if (metadataType.includes('words')) return 'bg-red-50 text-red-700';
       if (metadataType.includes('read')) return 'bg-red-50 text-red-700';
       if (metadataType.startsWith('Type:')) return 'bg-red-100 text-red-800';
+      if (metadataType.startsWith('Topics:')) return 'bg-red-50 text-red-600';
+      if (metadataType.includes('AI Analyzed')) return 'bg-purple-100 text-purple-800 font-semibold';
     }
     
     // Spreadsheet files
@@ -566,7 +584,16 @@ export default function FileAnalyzer({ files }: FileAnalyzerProps) {
                           {/* Generate description for all file types if possible */}
                           {additionalInfo.some(info => info.trim().startsWith('Type:')) && (
                             <div className="text-gray-600 text-xs italic ml-1 mb-2 max-w-md">
-                              <span className="font-medium">Description:</span> {inferredDescription(filename, mainSummary)}
+                              <span className="font-medium">Description:</span> {
+                                // Check if this is an AI-analyzed PDF
+                                additionalInfo.some(info => info.includes('AI Analyzed')) ? 
+                                // Just display the actual description
+                                additionalInfo.some(info => info.includes('Topics:')) ? 
+                                  "AI-generated summary of document content." :
+                                  inferredDescription(filename, mainSummary) :
+                                // Otherwise use the inferred description
+                                inferredDescription(filename, mainSummary)
+                              }
                             </div>
                           )}
                           

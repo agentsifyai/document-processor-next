@@ -37,7 +37,8 @@ export async function analyzeFile(file: File): Promise<AnalysisResult> {
 }
 
 // Export all types and classes
-export { FileAgent, DefaultAgent, AnalysisResult };
+// export { FileAgent, DefaultAgent, AnalysisResult }; Removed old agents
+export { DefaultAgent };
 export { TextAgent } from "./text-agent";
 export { PdfAgent } from "./pdf-agent";
 export { ImageAgent } from "./image-agent";
