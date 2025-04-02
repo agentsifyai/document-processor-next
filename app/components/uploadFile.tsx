@@ -207,7 +207,11 @@ function FileTreeItem({
   );
 }
 
-export default function UploadFile() {
+interface UploadFileProps {
+  onFilesChange?: (files: File[]) => void;
+}
+
+export default function UploadFile({ onFilesChange }: UploadFileProps = {}) {
   const [uploadedFiles, setUploadedFiles] = useState<TempFileData[]>([]);
   const [extractionProgress, setExtractionProgress] =
     useState<ExtractionProgress>({
@@ -225,6 +229,14 @@ export default function UploadFile() {
       });
     };
   }, [uploadedFiles]);
+  
+  // Notify parent component when files change
+  useEffect(() => {
+    if (onFilesChange) {
+      const allFiles = uploadedFiles.map(fileData => fileData.file);
+      onFilesChange(allFiles);
+    }
+  }, [uploadedFiles, onFilesChange]);
 
   // Log all file paths whenever uploadedFiles changes
   useEffect(() => {
