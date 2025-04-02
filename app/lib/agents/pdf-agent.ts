@@ -1,8 +1,5 @@
-import { FileAgent, AnalysisResult } from "./base-agent";
+import type { FileAgent, AnalysisResult } from "./base-agent";
 import OpenAI from "openai";
-
-// We're not using PDF.js due to worker loading issues in Next.js
-// Instead we'll focus on file metadata and basic content extraction
 
 /**
  * Agent for PDF files with enhanced AI capabilities
@@ -61,15 +58,16 @@ export class PdfAgent implements FileAgent {
           .replace(/\s+/g, " ")
           .trim();
 
-        return (
+        const metadata =
           `PDF document titled "${inferredTitle}" with approximately ${estimatedPages} pages. ` +
           `Size: ${
             sizeInKB >= 1024
               ? (sizeInKB / 1024).toFixed(2) + " MB"
               : sizeInKB.toFixed(2) + " KB"
           }. ` +
-          `Filename: ${file.name}`
-        );
+          `Filename: ${file.name}`;
+
+        return metadata;
       } else {
         return `Could not verify this as a valid PDF file: ${file.name}`;
       }
@@ -265,9 +263,10 @@ export class PdfAgent implements FileAgent {
     try {
       // Extract basic information from the PDF (no text content)
       pdfInfo = await this.extractPdfInfo(file);
+      console.log(pdfInfo);
 
       // Generate AI summary based on filename and metadata
-      aiSummary = await this.generateAiSummary(pdfInfo, fileName);
+      // aiSummary = await this.generateAiSummary(pdfInfo, fileName);
     } catch (error) {
       console.error("Error processing PDF:", error);
     }

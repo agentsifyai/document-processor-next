@@ -1,15 +1,18 @@
 /**
- * Base interface for file agents
+ * Result of a file analysis
  */
-export interface AnalysisResult {
+interface AnalysisResult {
   extension: string;
   summary: string;
   fileSize: number;
   mimeType: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
-export interface FileAgent {
+/**
+ * Interface for file agents
+ */
+interface FileAgent {
   /**
    * Check if this agent can handle the given file
    */
@@ -24,7 +27,7 @@ export interface FileAgent {
 /**
  * Default fallback agent for unsupported file types
  */
-export class DefaultAgent implements FileAgent {
+class DefaultAgent implements FileAgent {
   // Known binary file types and their descriptions
   private readonly knownBinaryTypes: Record<string, string> = {
     // Archives
@@ -176,7 +179,7 @@ export class DefaultAgent implements FileAgent {
     }
     
     // Generate metadata based on file properties
-    const metadata: Record<string, any> = {
+    const metadata: Record<string, unknown> = {
       fileType: knownType || fileCategory?.category || 'Unknown Binary',
       lastModified: new Date(file.lastModified).toLocaleString(),
     };
@@ -246,3 +249,7 @@ export class DefaultAgent implements FileAgent {
     }
   }
 }
+
+// Export all types and classes
+export type { AnalysisResult, FileAgent };
+export { DefaultAgent };

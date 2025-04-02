@@ -21,6 +21,7 @@ export default function ScanFile({ files }: ScanFileProps) {
     FileExtensionSummary[]
   >([]);
   const [scanning, setScanning] = useState<boolean>(false);
+  // Used to display the total number of files scanned
   const [totalFiles, setTotalFiles] = useState<number>(0);
   const [scanComplete, setScanComplete] = useState<boolean>(false);
 
@@ -30,6 +31,8 @@ export default function ScanFile({ files }: ScanFileProps) {
     // Create a map to track extensions
     const extensionMap = new Map<string, FileExtensionSummary>();
     let totalScannedFiles = 0;
+    // Variable to track individual file completion (not used in UI but helps with debugging)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let completedScans = 0;
 
     // Process files

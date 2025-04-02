@@ -239,6 +239,7 @@ export default function UploadFile({ onFilesChange }: UploadFileProps = {}) {
   }, [uploadedFiles, onFilesChange]);
 
   // Log all file paths whenever uploadedFiles changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (uploadedFiles.length > 0) {
       logAllFilePaths();
@@ -309,7 +310,7 @@ export default function UploadFile({ onFilesChange }: UploadFileProps = {}) {
   };
 
   // Generate a unique ID for files
-  const generateFileId = (file: File, parent?: string): string => {
+  const generateFileId = (file: File): string => {
     return `file-${Date.now()}-${Math.random().toString(36).slice(2)}-${
       file.name
     }`;
@@ -381,7 +382,7 @@ export default function UploadFile({ onFilesChange }: UploadFileProps = {}) {
 
       // Add the zip file itself so we can display it as the root
       tempFiles.push({
-        id: generateFileId(zipFile, parentName),
+        id: generateFileId(zipFile),
         file: zipFile,
         url: URL.createObjectURL(zipFile),
         isExtracted: false,
@@ -409,7 +410,7 @@ export default function UploadFile({ onFilesChange }: UploadFileProps = {}) {
 
         // Add the folder to tempFiles
         tempFiles.push({
-          id: generateFileId(folderFile, `${parentPath}/${folderName}`),
+          id: generateFileId(folderFile),
           file: folderFile,
           url: "",
           isExtracted: true,
@@ -450,7 +451,7 @@ export default function UploadFile({ onFilesChange }: UploadFileProps = {}) {
         } else {
           // Regular file from zip
           tempFiles.push({
-            id: generateFileId(extractedFile, displayPath),
+            id: generateFileId(extractedFile),
             file: extractedFile,
             url: URL.createObjectURL(extractedFile),
             isExtracted: true,
