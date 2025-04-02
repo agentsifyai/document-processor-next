@@ -24,12 +24,27 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="max-w-screen-xl mx-auto flex flex-col h-screen">
-        <header className="text-center p-4 bg-yellow-100">
-          <h1>Budimex Document Extractor</h1>
+      <body className="flex flex-col h-screen">
+        <header className="bg-yellow-100">
+          <div className="max-w-[1400px] mx-auto text-center p-8">
+            <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
+              Budimex Document Extractor
+            </h1>
+          </div>
         </header>
-        <main className="grow items-center content-center p-4">{children}</main>
-        <footer className="text-center p-4 bg-yellow-100">footer</footer>
+        <main className="grow items-center content-center p-4 max-w-[1400px] mx-auto">
+          {children}
+        </main>
+        <footer className="bg-yellow-100">
+          <div className="max-w-[1400px] mx-auto text-center p-8">
+            <p className="text-xl font-bold text-gray-800 tracking-tight">
+              Powered by{" "}
+              <a href="https://agentsify.ai/" target="_blank">
+                agentsify.ai
+              </a>
+            </p>
+          </div>
+        </footer>
       </body>
     </html>
   );

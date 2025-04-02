@@ -12,6 +12,7 @@
     "axios": "^1.8.4",
     "better-sqlite3": "^11.9.1",
     "exceljs": "^4.4.0",
+    "fs": "^0.0.1-security",
     "jszip": "^3.10.1",
     "langchain": "^0.3.19",
     "mammoth": "^1.9.0",
