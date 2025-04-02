@@ -251,22 +251,19 @@ export class PdfAgent implements FileAgent {
     }
 
     // Client-side rendering - extract basic info and generate AI summary if possible
-    let aiSummary = {
+    const aiSummary = {
       summary: "",
       topics: [] as string[],
       docType: "Document",
     };
 
     let pdfInfo = "";
-    let pageCount = Math.max(1, Math.ceil(sizeInKB / 100)); // Rough estimate
+    const pageCount = Math.max(1, Math.ceil(sizeInKB / 100)); // Rough estimate
 
     try {
       // Extract basic information from the PDF (no text content)
       pdfInfo = await this.extractPdfInfo(file);
       console.log(pdfInfo);
-
-      // Generate AI summary based on filename and metadata
-      // aiSummary = await this.generateAiSummary(pdfInfo, fileName);
     } catch (error) {
       console.error("Error processing PDF:", error);
     }
