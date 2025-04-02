@@ -9,7 +9,7 @@ interface FileExtensionSummary {
   count: number;
   files: string[];
   totalSize: number;
-  fileSummaries: string[]; // Field to store file summaries
+  fileSummaries: string[];
 }
 
 interface FileAnalyzerProps {
